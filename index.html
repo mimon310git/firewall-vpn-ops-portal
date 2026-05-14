@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Firewall VPN Ops Portal</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <svg class="icon-defs" aria-hidden="true">
+      <symbol id="icon-dashboard" viewBox="0 0 24 24">
+        <path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Z" />
+      </symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24">
+        <path d="M12 3 5 6v5c0 4.7 2.8 8.8 7 10 4.2-1.2 7-5.3 7-10V6l-7-3Zm0 2.2L17 7.3V11c0 3.5-2 6.6-5 7.8-3-1.2-5-4.3-5-7.8V7.3l5-2.1Z" />
+      </symbol>
+      <symbol id="icon-vpn" viewBox="0 0 24 24">
+        <path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v7A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5v-7A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Zm3 3.2a1.8 1.8 0 0 0-.8 3.4V18h1.6v-1.4a1.8 1.8 0 0 0-.8-3.4Z" />
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path d="m9.2 16.6-4-4 1.4-1.4 2.6 2.6 8.2-8.2L18.8 7 9.2 16.6Z" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z" />
+      </symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7L8 5Z" />
+      </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M11 4h2v8.2l3.1-3.1 1.4 1.4L12 16l-5.5-5.5 1.4-1.4 3.1 3.1V4ZM5 18h14v2H5v-2Z" />
+      </symbol>
+      <symbol id="icon-reset" viewBox="0 0 24 24">
+        <path d="M6.4 7A8 8 0 1 1 4 12H2a10 10 0 1 0 3-7.1L3 3v6h6L6.4 7Z" />
+      </symbol>
+      <symbol id="icon-lab" viewBox="0 0 24 24">
+        <path d="M9 3h6v2h-1v4.4l5.4 8.6A2 2 0 0 1 17.7 21H6.3a2 2 0 0 1-1.7-3L10 9.4V5H9V3Zm3 7.6L6.3 19h11.4L12 10.6ZM9 17l1.2-2h3.6L15 17H9Z" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand">
+          <span class="brand-mark">FW</span>
+          <div>
+            <strong>Ops Portal</strong>
+            <span>Firewall + VPN</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" data-view="dashboard" type="button">
+            <svg><use href="#icon-dashboard"></use></svg>
+            <span>Dashboard</span>
+          </button>
+          <button class="nav-item" data-view="firewall" type="button">
+            <svg><use href="#icon-shield"></use></svg>
+            <span>Firewall Rules</span>
+          </button>
+          <button class="nav-item" data-view="vpn" type="button">
+            <svg><use href="#icon-vpn"></use></svg>
+            <span>VPN Tunnels</span>
+          </button>
+          <button class="nav-item" data-view="approvals" type="button">
+            <svg><use href="#icon-check"></use></svg>
+            <span>Approvals</span>
+          </button>
+          <button class="nav-item" data-view="health" type="button">
+            <svg><use href="#icon-play"></use></svg>
+            <span>Health Checks</span>
+          </button>
+          <button class="nav-item" data-view="lab" type="button">
+            <svg><use href="#icon-lab"></use></svg>
+            <span>Lab Tools</span>
+          </button>
+        </nav>
+
+        <div class="side-panel">
+          <span class="panel-label">Environment</span>
+          <strong>Local Lab</strong>
+          <span>HQ + Branch + VPN-RA</span>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operations workspace</p>
+            <h1 id="pageTitle">Firewall and VPN Operations</h1>
+          </div>
+          <div class="topbar-actions">
+            <label class="role-control" for="roleSelect">
+              <span>Role</span>
+              <select id="roleSelect" name="role">
+                <option value="requester">Requester</option>
+                <option value="approver">Approver</option>
+                <option value="operator">Operator</option>
+              </select>
+            </label>
+            <button class="icon-button" id="exportBtn" type="button" title="Export data">
+              <svg><use href="#icon-download"></use></svg>
+            </button>
+            <button class="icon-button" id="resetBtn" type="button" title="Reset demo data">
+              <svg><use href="#icon-reset"></use></svg>
+            </button>
+          </div>
+        </header>
+        <div class="global-message" id="globalMessage" role="status"></div>
+
+        <section class="view is-visible" id="view-dashboard" aria-labelledby="dashboardHeading">
+          <div class="section-heading">
+            <div>
+              <h2 id="dashboardHeading">Dashboard</h2>
+              <p>Current operational state across firewall policy, VPN access, and service checks.</p>
+            </div>
+            <button class="primary-button" id="runChecksTopBtn" type="button">
+              <svg><use href="#icon-play"></use></svg>
+              Run checks
+            </button>
+          </div>
+
+          <div class="metric-grid" id="metricGrid"></div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Topology</h3>
+                <span class="status-pill info">Lab map</span>
+              </div>
+              <div class="topology-map" aria-label="HQ, branch, and remote VPN topology">
+                <div class="node wan">WAN<br /><span>198.51.100.0/24</span></div>
+                <div class="node fw">FW-HQ<br /><span>10.10.x.1</span></div>
+                <div class="node fw branch">FW-BR<br /><span>10.20.10.1</span></div>
+                <div class="node zone lan">LAN<br /><span>10.10.10.0/24</span></div>
+                <div class="node zone srv">SRV<br /><span>10.10.20.0/24</span></div>
+                <div class="node zone mgmt">MGMT<br /><span>10.10.30.0/24</span></div>
+                <div class="node zone dmz">DMZ<br /><span>10.10.40.0/24</span></div>
+                <div class="node zone brlan">BR-LAN<br /><span>10.20.10.0/24</span></div>
+                <div class="node vpn-node">VPN-RA<br /><span>10.99.99.0/24</span></div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Recent Audit</h3>
+                <button class="text-button" data-view-link="approvals" type="button">Review queue</button>
+              </div>
+              <div class="audit-feed" id="recentAudit"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-firewall" aria-labelledby="firewallHeading">
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 id="firewallHeading">Firewall Rules</h2>
+                  <p>Change requests move through pending, approved, and deployed states.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Source</th>
+                      <th>Destination</th>
+                      <th>Service</th>
+                      <th>Status</th>
+                      <th>Risk</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rulesTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="panel form-panel">
+              <h3>New Firewall Rule</h3>
+              <form id="ruleForm" novalidate>
+                <label>
+                  Source
+                  <input name="source" placeholder="10.10.10.0/24" required />
+                </label>
+                <label>
+                  Destination
+                  <input name="destination" placeholder="10.10.20.10" required />
+                </label>
+                <div class="form-row">
+                  <label>
+                    Protocol
+                    <select name="protocol">
+                      <option>TCP</option>
+                      <option>UDP</option>
+                      <option>ICMP</option>
+                    </select>
+                  </label>
+                  <label>
+                    Port
+                    <input name="port" placeholder="443" required />
+                  </label>
+                </div>
+                <label>
+                  Reason
+                  <textarea name="reason" rows="3" placeholder="Why is this flow required?" required></textarea>
+                </label>
+                <label>
+                  Owner
+                  <input name="owner" placeholder="network.ops" required />
+                </label>
+                <div class="form-error" id="ruleError" role="alert"></div>
+                <button class="primary-button full-width" type="submit">
+                  <svg><use href="#icon-shield"></use></svg>
+                  Create request
+                </button>
+              </form>
+            </aside>
+          </div>
+
+          <section class="panel command-panel">
+            <div class="panel-header">
+              <h3>Generated Change Command</h3>
+              <span class="status-pill neutral">Simulation only</span>
+            </div>
+            <pre id="commandPreview">Select an approved rule to generate a deployment command.</pre>
+          </section>
+        </section>
+
+        <section class="view" id="view-vpn" aria-labelledby="vpnHeading">
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 id="vpnHeading">VPN Tunnels</h2>
+                  <p>Track site-to-site and remote-access VPN entries with operational status.</p>
+                </div>
+              </div>
+              <div class="tunnel-grid" id="tunnelGrid"></div>
+            </section>
+
+            <aside class="panel form-panel">
+              <h3>New VPN Entry</h3>
+              <form id="tunnelForm" novalidate>
+                <label>
+                  Name
+                  <input name="name" placeholder="BRANCH-IPSEC-01" required />
+                </label>
+                <label>
+                  Type
+                  <select name="type">
+                    <option>IPsec</option>
+                    <option>OpenVPN</option>
+                    <option>WireGuard</option>
+                  </select>
+                </label>
+                <label>
+                  Peer / Endpoint
+                  <input name="peer" placeholder="198.51.100.20" required />
+                </label>
+                <label>
+                  Local Network
+                  <input name="localNet" placeholder="10.10.20.0/24" required />
+                </label>
+                <label>
+                  Remote Network
+                  <input name="remoteNet" placeholder="10.20.10.0/24" required />
+                </label>
+                <label>
+                  Owner
+                  <input name="owner" placeholder="network.ops" required />
+                </label>
+                <div class="form-error" id="tunnelError" role="alert"></div>
+                <button class="primary-button full-width" type="submit">
+                  <svg><use href="#icon-vpn"></use></svg>
+                  Add tunnel
+                </button>
+              </form>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-approvals" aria-labelledby="approvalsHeading">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 id="approvalsHeading">Approval Queue</h2>
+                <p>Review pending firewall and VPN changes before they can be marked deployed.</p>
+              </div>
+            </div>
+            <div id="approvalQueue" class="approval-list"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-health" aria-labelledby="healthHeading">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 id="healthHeading">Health Checks</h2>
+                <p>Run simulated checks for DNS, HTTPS, IPsec, OpenVPN, and admin access.</p>
+              </div>
+              <button class="primary-button" id="runChecksBtn" type="button">
+                <svg><use href="#icon-play"></use></svg>
+                Run all
+              </button>
+            </div>
+            <div class="health-grid" id="healthGrid"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-lab" aria-labelledby="labHeading">
+          <div class="section-heading">
+            <div>
+              <h2 id="labHeading">Lab Tools</h2>
+              <p>Generate reviewed firewall snippets and run gated read-only checks against configured lab hosts.</p>
+            </div>
+            <span class="status-pill neutral" id="labModePill">Lab mode off</span>
+          </div>
+
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Read-Only Lab Checks</h3>
+                  <p>Targets are stored in SQLite. Real TCP probes only run when lab mode is enabled on the backend.</p>
+                </div>
+                <button class="primary-button" id="runLabChecksBtn" type="button">
+                  <svg><use href="#icon-play"></use></svg>
+                  Run lab checks
+                </button>
+              </div>
+              <div class="lab-grid" id="labTargetGrid"></div>
+            </section>
+
+            <aside class="panel form-panel">
+              <h3>New Lab Target</h3>
+              <form id="labTargetForm" novalidate>
+                <label>
+                  Name
+                  <input name="name" placeholder="OPNsense lab UI" required />
+                </label>
+                <label>
+                  Host
+                  <input name="host" placeholder="192.0.2.10" required />
+                </label>
+                <div class="form-row">
+                  <label>
+                    Kind
+                    <select name="kind">
+                      <option>tcp</option>
+                    </select>
+                  </label>
+                  <label>
+                    Port
+                    <input name="port" placeholder="443" required />
+                  </label>
+                </div>
+                <label class="checkbox-control">
+                  <input name="enabled" type="checkbox" checked />
+                  <span>Enabled</span>
+                </label>
+                <div class="form-error" id="labTargetError" role="alert"></div>
+                <button class="primary-button full-width" type="submit">
+                  <svg><use href="#icon-lab"></use></svg>
+                  Add target
+                </button>
+              </form>
+            </aside>
+          </div>
+
+          <section class="panel command-panel">
+            <div class="panel-header">
+              <div>
+                <h3>OPNsense / pfSense Snippet</h3>
+                <p>Generated from approved and deployed firewall rules. Import remains manual and reviewed.</p>
+              </div>
+              <div class="snippet-actions">
+                <select id="snippetPlatform" aria-label="Snippet platform">
+                  <option value="opnsense">OPNsense</option>
+                  <option value="pfsense">pfSense</option>
+                </select>
+                <button class="primary-button" id="generateSnippetBtn" type="button">
+                  <svg><use href="#icon-download"></use></svg>
+                  Generate
+                </button>
+              </div>
+            </div>
+            <pre id="snippetPreview">Generate an OPNsense or pfSense snippet from approved and deployed rules.</pre>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="assets/app.js"></script>
+  </body>
+</html>

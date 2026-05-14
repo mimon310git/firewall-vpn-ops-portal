@@ -1,0 +1,21 @@
+# OS
+Thumbs.db
+.DS_Store
+
+# Local exports
+*.local.json
+firewall-vpn-ops-export.json
+data/
+.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.sqlite3
+
+# Future Node version
+node_modules/
+playwright-report/
+test-results/

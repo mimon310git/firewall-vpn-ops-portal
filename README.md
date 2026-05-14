@@ -60,9 +60,12 @@ The app lets you create a firewall rule request with:
 - protocol
 - port
 - business reason
+- ticket ID such as `SEC-123` or `CHG-123`
+- expiration date for temporary access review
 - owner
 
 It validates the input and blocks common mistakes such as invalid IP ranges, invalid ports, and duplicate active rules.
+The firewall page also includes search and filters by status, risk, owner, ticket, port, and rule text.
 
 The UI includes a port reference and rule review notes for common operational decisions:
 
@@ -72,7 +75,7 @@ The UI includes a port reference and rule review notes for common operational de
 - `0.0.0.0/0` and other broad exposure patterns are marked high risk.
 - Good requests include a business reason, owner, expected protocol, and scoped source/destination.
 
-The app also has a `Theory` section with a short reference for common ports, rule review, risk scoring, and the operational change lifecycle.
+The app also has a `Theory` section with a short reference for common ports, rule review, risk scoring, and the operational change lifecycle. Each firewall rule has a detail view with owner, ticket, expiration, audit trail, risk explanation, and command preview.
 
 ### Approval Workflow
 

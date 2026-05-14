@@ -553,7 +553,7 @@ textarea:disabled {
 
 table {
   width: 100%;
-  min-width: 760px;
+  min-width: 980px;
   border-collapse: collapse;
 }
 
@@ -569,6 +569,25 @@ th {
   color: var(--muted);
   font-size: 0.82rem;
   text-transform: uppercase;
+}
+
+tbody tr.is-selected {
+  background: #f0fdfa;
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(140px, 0.45fr));
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.filter-bar label {
+  font-size: 0.76rem;
 }
 
 td code,
@@ -759,6 +778,54 @@ textarea:focus {
   box-shadow: none;
 }
 
+.detail-panel {
+  box-shadow: none;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.75fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.detail-copy {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.detail-copy p {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+
+.detail-panel h4 {
+  margin: 0 0 10px;
+}
+
+.compact-audit {
+  display: grid;
+  gap: 8px;
+}
+
+.compact-audit article {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.compact-audit span {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.detail-command {
+  min-height: 120px;
+  margin-top: 0;
+}
+
 pre {
   overflow-x: auto;
   min-height: 58px;
@@ -913,7 +980,9 @@ pre {
   .metric-grid,
   .dashboard-grid,
   .split-layout,
-  .reference-grid {
+  .reference-grid,
+  .detail-grid,
+  .filter-bar {
     grid-template-columns: 1fr;
   }
 }

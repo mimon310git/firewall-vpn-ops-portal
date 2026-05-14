@@ -20,6 +20,8 @@ destination: 10.10.20.50
 protocol: TCP
 port: 8443
 reason: Test access for web application
+ticket ID: SEC-2042
+expires: 2026-06-30
 owner: qa.ops
 ```
 
@@ -28,18 +30,20 @@ owner: qa.ops
 9. Open `Approvals`.
 10. Approve the rule.
 11. Return to `Firewall Rules`.
-12. Generate a command for the approved rule.
-13. Select the `Operator` role.
-14. Deploy the rule.
-15. Open `Health Checks`.
-16. Run all checks.
-17. Open `Lab Tools`.
-18. Generate an `OPNsense` snippet and confirm the preview contains `<filter>` and manual review text.
-19. Run lab checks with default backend settings.
-20. Confirm enabled lab targets show `skipped` because controlled lab mode is off.
-21. Add a new lab target as `Operator`.
-22. Export the JSON data.
-23. Reset demo data.
+12. Use the search/filter controls to find the rule by `SEC-2042`.
+13. Open `Details` and confirm owner, ticket, expiration, reason, audit trail, risk explanation, and command preview.
+14. Generate a command for the approved rule.
+15. Select the `Operator` role.
+16. Deploy the rule.
+17. Open `Health Checks`.
+18. Run all checks.
+19. Open `Lab Tools`.
+20. Generate an `OPNsense` snippet and confirm the preview contains `<filter>` and manual review text.
+21. Run lab checks with default backend settings.
+22. Confirm enabled lab targets show `skipped` because controlled lab mode is off.
+23. Add a new lab target as `Operator`.
+24. Export the JSON data.
+25. Reset demo data.
 
 ## Controlled Lab Smoke Test
 
@@ -71,6 +75,7 @@ Covered API scenarios:
 
 - seeded state loads from SQLite
 - requester can create a firewall rule
+- firewall rules include ticket ID and expiration date
 - duplicate active rules are blocked
 - invalid source IP returns a validation error
 - requester cannot approve
@@ -166,9 +171,9 @@ Expected result:
 The request is accepted but marked as high risk.
 ```
 
-## Playwright Ideas
+## Future UI Test Ideas
 
-Good automated tests for version 3:
+Good automated UI tests for a later version:
 
 - dashboard renders metrics
 - valid firewall request can be created
@@ -176,6 +181,8 @@ Good automated tests for version 3:
 - duplicate rule shows an error
 - pending rule can be approved
 - approved rule can generate a command
+- rule detail shows metadata and audit context
+- search and filters can narrow firewall rules
 - VPN tunnel can be added
 - health checks can be run
 - OPNsense snippet can be generated

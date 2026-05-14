@@ -165,13 +165,45 @@
                   <p>Change requests define source, destination, protocol, port, business reason, and approval state.</p>
                 </div>
               </div>
+              <div class="filter-bar" aria-label="Firewall rule filters">
+                <label>
+                  Search
+                  <input id="ruleSearch" type="search" placeholder="Source, destination, ticket, owner..." />
+                </label>
+                <label>
+                  Status
+                  <select id="statusFilter">
+                    <option value="">All statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="deployed">Deployed</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </label>
+                <label>
+                  Risk
+                  <select id="riskFilter">
+                    <option value="">All risk</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </label>
+                <label>
+                  Owner
+                  <input id="ownerFilter" placeholder="network.ops" />
+                </label>
+              </div>
               <div class="table-wrap">
                 <table>
                   <thead>
                     <tr>
+                      <th>ID</th>
                       <th>Source</th>
                       <th>Destination</th>
                       <th>Service</th>
+                      <th>Ticket</th>
+                      <th>Expires</th>
                       <th>Status</th>
                       <th>Risk</th>
                       <th>Action</th>
@@ -217,6 +249,16 @@
                     required
                   ></textarea>
                 </label>
+                <div class="form-row">
+                  <label>
+                    Ticket ID
+                    <input name="ticketId" placeholder="SEC-123" required />
+                  </label>
+                  <label>
+                    Expires
+                    <input name="expiresAt" type="date" required />
+                  </label>
+                </div>
                 <label>
                   Owner
                   <input name="owner" placeholder="network.ops" required />
@@ -229,6 +271,10 @@
               </form>
             </aside>
           </div>
+
+          <section class="panel detail-panel" id="ruleDetail">
+            <div class="empty-state">Select a firewall rule to review owner, ticket, audit trail, risk explanation, and command preview.</div>
+          </section>
 
           <section class="panel command-panel">
             <div class="panel-header">

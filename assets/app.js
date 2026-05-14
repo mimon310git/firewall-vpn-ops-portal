@@ -18,6 +18,7 @@ let state = { ...emptyState, roles: [...emptyState.roles] };
 let currentRole = localStorage.getItem(ROLE_KEY) || "requester";
 let currentView = "dashboard";
 let currentSnippet = "Generate an OPNsense or pfSense snippet from approved and deployed rules.";
+let selectedRuleId = "";
 
 const viewTitles = {
   dashboard: "Firewall and VPN Operations",
@@ -37,6 +38,11 @@ const tunnelForm = document.querySelector("#tunnelForm");
 const ruleError = document.querySelector("#ruleError");
 const tunnelError = document.querySelector("#tunnelError");
 const commandPreview = document.querySelector("#commandPreview");
+const ruleDetail = document.querySelector("#ruleDetail");
+const ruleSearch = document.querySelector("#ruleSearch");
+const statusFilter = document.querySelector("#statusFilter");
+const riskFilter = document.querySelector("#riskFilter");
+const ownerFilter = document.querySelector("#ownerFilter");
 const roleSelect = document.querySelector("#roleSelect");
 const globalMessage = document.querySelector("#globalMessage");
 const runChecksBtn = document.querySelector("#runChecksBtn");
@@ -79,6 +85,11 @@ resetBtn.addEventListener("click", resetData);
 runLabChecksBtn.addEventListener("click", runLabChecks);
 generateSnippetBtn.addEventListener("click", generateSnippet);
 
+[ruleSearch, statusFilter, riskFilter, ownerFilter].forEach((control) => {
+  control.addEventListener("input", renderRules);
+  control.addEventListener("change", renderRules);
+});
+
 ruleForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(ruleForm);
@@ -88,6 +99,8 @@ ruleForm.addEventListener("submit", async (event) => {
     protocol: clean(formData.get("protocol")),
     port: clean(formData.get("port")),
     reason: clean(formData.get("reason")),
+    ticketId: clean(formData.get("ticketId")),
+    expiresAt: clean(formData.get("expiresAt")),
     owner: clean(formData.get("owner")),
   };
 
@@ -212,6 +225,7 @@ function showView(viewName) {
 function render() {
   renderMetrics();
   renderRules();
+  renderRuleDetail();
   renderTunnels();
   renderApprovals();
   renderHealth();
@@ -282,16 +296,33 @@ function renderMetrics() {
 
 function renderRules() {
   const table = document.querySelector("#rulesTable");
+  const rules = getFilteredRules();
+
   if (!state.rules.length) {
-    table.innerHTML = `<tr><td colspan="6">No firewall rules yet.</td></tr>`;
+    table.innerHTML = `<tr><td colspan="9">No firewall rules yet.</td></tr>`;
+    selectedRuleId = "";
+    renderRuleDetail();
     return;
   }
 
-  table.innerHTML = state.rules
+  if (!rules.length) {
+    table.innerHTML = `<tr><td colspan="9">No firewall rules match the current filters.</td></tr>`;
+    selectedRuleId = "";
+    renderRuleDetail();
+    return;
+  }
+
+  if (selectedRuleId && !rules.some((rule) => rule.id === selectedRuleId)) {
+    selectedRuleId = "";
+  }
+
+  table.innerHTML = rules
     .map((rule) => {
-      const actions = [];
-      if (rule.status === "approved") {
+      const actions = [`<button class="table-action" type="button" data-detail="${rule.id}">Details</button>`];
+      if (["approved", "deployed"].includes(rule.status)) {
         actions.push(`<button class="table-action" type="button" data-command="${rule.id}">Command</button>`);
+      }
+      if (rule.status === "approved") {
         if (can("operator")) {
           actions.push(`<button class="table-action" type="button" data-deploy="${rule.id}">Deploy</button>`);
         }
@@ -301,14 +332,17 @@ function renderRules() {
       }
 
       return `
-        <tr>
+        <tr class="${selectedRuleId === rule.id ? "is-selected" : ""}">
+          <td><strong>${escapeHtml(rule.id)}</strong></td>
           <td><code>${escapeHtml(rule.source)}</code></td>
           <td><code>${escapeHtml(rule.destination)}</code></td>
           <td>${escapeHtml(rule.protocol)}/${escapeHtml(rule.port)}</td>
+          <td>${escapeHtml(rule.ticketId || "n/a")}</td>
+          <td>${escapeHtml(rule.expiresAt || "n/a")}</td>
           <td><span class="status-pill ${rule.status}">${escapeHtml(rule.status)}</span></td>
           <td><span class="status-pill ${rule.risk}">${escapeHtml(rule.risk)}</span></td>
           <td>
-            <div class="button-row">${actions.join("") || `<span class="muted-cell">-</span>`}</div>
+            <div class="button-row">${actions.join("")}</div>
           </td>
         </tr>
       `;
@@ -326,6 +360,107 @@ function renderRules() {
   table.querySelectorAll("[data-command]").forEach((button) => {
     button.addEventListener("click", () => previewCommand(button.dataset.command));
   });
+
+  table.querySelectorAll("[data-detail]").forEach((button) => {
+    button.addEventListener("click", () => selectRule(button.dataset.detail));
+  });
+
+  renderRuleDetail();
+}
+
+function getFilteredRules() {
+  const search = clean(ruleSearch.value).toLowerCase();
+  const status = statusFilter.value;
+  const risk = riskFilter.value;
+  const owner = clean(ownerFilter.value).toLowerCase();
+
+  return state.rules.filter((rule) => {
+    const searchable = [
+      rule.id,
+      rule.source,
+      rule.destination,
+      rule.protocol,
+      rule.port,
+      rule.ticketId,
+      rule.expiresAt,
+      rule.owner,
+      rule.reason,
+      rule.status,
+      rule.risk,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return (
+      (!search || searchable.includes(search)) &&
+      (!status || rule.status === status) &&
+      (!risk || rule.risk === risk) &&
+      (!owner || String(rule.owner).toLowerCase().includes(owner))
+    );
+  });
+}
+
+function selectRule(id) {
+  selectedRuleId = id;
+  renderRules();
+}
+
+function renderRuleDetail() {
+  const rule = state.rules.find((item) => item.id === selectedRuleId);
+  if (!rule) {
+    ruleDetail.innerHTML = `<div class="empty-state">Select a firewall rule to review owner, ticket, audit trail, risk explanation, and command preview.</div>`;
+    return;
+  }
+
+  const auditEvents = state.audit.filter((event) => event.target === rule.id).slice(0, 5);
+  ruleDetail.innerHTML = `
+    <div class="panel-header">
+      <div>
+        <h3>${escapeHtml(rule.id)} Rule Detail</h3>
+        <p>${escapeHtml(rule.source)} -> ${escapeHtml(rule.destination)} ${escapeHtml(rule.protocol)}/${escapeHtml(rule.port)}</p>
+      </div>
+      <span class="status-pill ${rule.status}">${escapeHtml(rule.status)}</span>
+    </div>
+    <div class="detail-grid">
+      <dl class="detail-list">
+        <div><dt>Owner</dt><dd>${escapeHtml(rule.owner)}</dd></div>
+        <div><dt>Ticket</dt><dd>${escapeHtml(rule.ticketId || "n/a")}</dd></div>
+        <div><dt>Expires</dt><dd>${escapeHtml(rule.expiresAt || "n/a")}</dd></div>
+        <div><dt>Risk</dt><dd><span class="status-pill ${rule.risk}">${escapeHtml(rule.risk)}</span></dd></div>
+      </dl>
+      <div class="detail-copy">
+        <strong>Reason</strong>
+        <p>${escapeHtml(rule.reason)}</p>
+        <strong>Risk explanation</strong>
+        <p>${escapeHtml(explainRisk(rule))}</p>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <h4>Audit Trail</h4>
+        <div class="compact-audit">
+          ${
+            auditEvents.length
+              ? auditEvents
+                  .map(
+                    (event) => `
+                      <article>
+                        <strong>${escapeHtml(event.action)}</strong>
+                        <span>${escapeHtml(event.at)} - ${escapeHtml(event.actor)}</span>
+                      </article>
+                    `,
+                  )
+                  .join("")
+              : `<div class="empty-state">No audit events for this rule yet.</div>`
+          }
+        </div>
+      </div>
+      <div>
+        <h4>Command Preview</h4>
+        <pre class="detail-command">${escapeHtml(buildCommand(rule))}</pre>
+      </div>
+    </div>
+  `;
 }
 
 function renderTunnels() {
@@ -395,6 +530,10 @@ function renderApprovals() {
             </div>
             <span class="status-pill ${rule.risk}">${escapeHtml(rule.risk)} risk</span>
           </header>
+          <dl class="detail-list">
+            <div><dt>Ticket</dt><dd>${escapeHtml(rule.ticketId || "n/a")}</dd></div>
+            <div><dt>Expires</dt><dd>${escapeHtml(rule.expiresAt || "n/a")}</dd></div>
+          </dl>
           <p>${escapeHtml(rule.reason)}</p>
           ${renderApprovalActions(rule.id, "rule")}
         </article>
@@ -554,6 +693,7 @@ function renderAudit() {
 async function approveRule(id) {
   try {
     const rule = await apiRequest(`/rules/${id}/approve`, { method: "POST" });
+    selectedRuleId = id;
     previewCommandFromRule(rule);
     await loadState();
     showMessage("Firewall request approved.", "success");
@@ -575,6 +715,7 @@ async function rejectRule(id) {
 async function deployRule(id) {
   try {
     const rule = await apiRequest(`/rules/${id}/deploy`, { method: "POST" });
+    selectedRuleId = id;
     previewCommandFromRule(rule);
     await loadState();
     showMessage("Firewall rule marked as deployed.", "success");
@@ -586,19 +727,37 @@ async function deployRule(id) {
 function previewCommand(id) {
   const rule = state.rules.find((item) => item.id === id);
   if (!rule) return;
+  selectedRuleId = id;
+  renderRules();
   previewCommandFromRule(rule);
 }
 
 function previewCommandFromRule(rule) {
+  commandPreview.textContent = buildCommand(rule);
+}
+
+function buildCommand(rule) {
   const comment = rule.reason.replaceAll('"', "'");
-  const command =
+  return (
     rule.protocol === "ICMP"
       ? `# Simulated deployment note for ${rule.id}
 # Create a pass ICMP rule from ${rule.source} to ${rule.destination}.
 # Reason: ${comment}`
       : `# Simulated deployment command for ${rule.id}
-sudo ufw allow proto ${rule.protocol.toLowerCase()} from ${rule.source} to ${rule.destination} port ${rule.port} comment "${comment}"`;
-  commandPreview.textContent = command;
+# Ticket: ${rule.ticketId || "n/a"}
+# Expires: ${rule.expiresAt || "n/a"}
+sudo ufw allow proto ${rule.protocol.toLowerCase()} from ${rule.source} to ${rule.destination} port ${rule.port} comment "${comment}"`
+  );
+}
+
+function explainRisk(rule) {
+  if (rule.risk === "high") {
+    return "High risk because the request contains broad exposure or an internet-facing source/destination pattern.";
+  }
+  if (rule.risk === "medium") {
+    return "Medium risk because the request touches an admin service, management network, or sensitive port.";
+  }
+  return "Low risk because the request is scoped to a specific internal flow and non-admin service.";
 }
 
 async function approveTunnel(id) {

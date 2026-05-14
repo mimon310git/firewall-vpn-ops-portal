@@ -16,8 +16,3 @@ __pycache__/
 .tmp_pytest/
 .tmp_pytest_cache/
 *.sqlite3
-
-# Future Node version
-node_modules/
-playwright-report/
-test-results/

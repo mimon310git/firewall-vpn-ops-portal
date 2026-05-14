@@ -63,11 +63,15 @@ This is a portfolio simulation, not production authentication. A real deployment
   "port": "443",
   "reason": "User access to internal web application",
   "owner": "network.ops",
+  "ticketId": "SEC-1001",
+  "expiresAt": "2026-08-14",
   "status": "pending",
   "risk": "low",
   "createdAt": "2026-05-14 09:00"
 }
 ```
+
+Firewall rules include ticket and expiration metadata because real temporary access should be traceable to a change record and reviewed or removed later.
 
 ### VPN Tunnel
 

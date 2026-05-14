@@ -21,6 +21,8 @@ def valid_rule() -> dict[str, str]:
         "protocol": "TCP",
         "port": "8443",
         "reason": "Temporary QA access",
+        "ticketId": "SEC-2042",
+        "expiresAt": "2026-06-30",
         "owner": "qa.ops",
     }
 
@@ -36,6 +38,8 @@ def test_state_is_seeded(tmp_path: Path) -> None:
     assert len(data["tunnels"]) == 2
     assert len(data["labTargets"]) == 2
     assert data["labMode"] is False
+    assert data["rules"][0]["ticketId"]
+    assert data["rules"][0]["expiresAt"]
     assert data["roles"] == ["requester", "approver", "operator"]
 
 

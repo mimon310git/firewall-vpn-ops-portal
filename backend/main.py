@@ -33,6 +33,8 @@ DEMO_RULES = [
         "port": "443",
         "reason": "User access to internal web application",
         "owner": "network.ops",
+        "ticketId": "SEC-1001",
+        "expiresAt": "2026-08-14",
         "status": "deployed",
         "risk": "low",
         "createdAt": "2026-05-14 09:00",
@@ -45,6 +47,8 @@ DEMO_RULES = [
         "port": "3389",
         "reason": "Remote admin access to jump host",
         "owner": "sec.ops",
+        "ticketId": "SEC-1002",
+        "expiresAt": "2026-06-14",
         "status": "approved",
         "risk": "medium",
         "createdAt": "2026-05-14 09:08",
@@ -57,6 +61,8 @@ DEMO_RULES = [
         "port": "443",
         "reason": "Temporary external publishing test",
         "owner": "app.owner",
+        "ticketId": "CHG-1003",
+        "expiresAt": "2026-05-21",
         "status": "pending",
         "risk": "high",
         "createdAt": "2026-05-14 09:12",
@@ -188,6 +194,8 @@ class RuleCreate(BaseModel):
     port: str = ""
     reason: str
     owner: str
+    ticketId: str = ""
+    expiresAt: str = ""
 
 
 class TunnelCreate(BaseModel):
@@ -281,9 +289,9 @@ def create_app(
             """
             INSERT INTO rules (
                 id, source, destination, protocol, port, reason, owner,
-                status, risk, created_at
+                ticket_id, expires_at, status, risk, created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 rule_id,
@@ -293,6 +301,8 @@ def create_app(
                 rule["port"],
                 rule["reason"],
                 rule["owner"],
+                rule["ticketId"],
+                rule["expiresAt"],
                 "pending",
                 calculate_risk(rule),
                 now_stamp(),
@@ -600,6 +610,8 @@ def create_schema(db: sqlite3.Connection) -> None:
             port TEXT NOT NULL,
             reason TEXT NOT NULL,
             owner TEXT NOT NULL,
+            ticket_id TEXT NOT NULL DEFAULT '',
+            expires_at TEXT NOT NULL DEFAULT '',
             status TEXT NOT NULL,
             risk TEXT NOT NULL,
             created_at TEXT NOT NULL
@@ -649,6 +661,14 @@ def create_schema(db: sqlite3.Connection) -> None:
         );
         """
     )
+    ensure_column(db, "rules", "ticket_id", "TEXT NOT NULL DEFAULT ''")
+    ensure_column(db, "rules", "expires_at", "TEXT NOT NULL DEFAULT ''")
+
+
+def ensure_column(db: sqlite3.Connection, table: str, column: str, definition: str) -> None:
+    columns = {row["name"] for row in db.execute(f"PRAGMA table_info({table})").fetchall()}
+    if column not in columns:
+        db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 
 def clear_data(db: sqlite3.Connection) -> None:
@@ -662,9 +682,9 @@ def seed_demo_data(db: sqlite3.Connection) -> None:
             """
             INSERT INTO rules (
                 id, source, destination, protocol, port, reason, owner,
-                status, risk, created_at
+                ticket_id, expires_at, status, risk, created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 rule["id"],
@@ -674,6 +694,8 @@ def seed_demo_data(db: sqlite3.Connection) -> None:
                 rule["port"],
                 rule["reason"],
                 rule["owner"],
+                rule["ticketId"],
+                rule["expiresAt"],
                 rule["status"],
                 rule["risk"],
                 rule["createdAt"],
@@ -793,6 +815,8 @@ def format_rule(row: sqlite3.Row) -> dict[str, Any]:
         "port": row["port"],
         "reason": row["reason"],
         "owner": row["owner"],
+        "ticketId": row["ticket_id"],
+        "expiresAt": row["expires_at"],
         "status": row["status"],
         "risk": row["risk"],
         "createdAt": row["created_at"],
@@ -886,6 +910,8 @@ def normalize_rule(payload: RuleCreate) -> dict[str, str]:
         "port": port,
         "reason": clean(payload.reason),
         "owner": clean(payload.owner),
+        "ticketId": clean(payload.ticketId).upper(),
+        "expiresAt": clean(payload.expiresAt),
     }
 
 
@@ -923,6 +949,10 @@ def validate_rule(db: sqlite3.Connection, rule: dict[str, str]) -> None:
         raise HTTPException(status_code=422, detail="Reason must explain why this access is needed.")
     if not rule["owner"]:
         raise HTTPException(status_code=422, detail="Owner is required.")
+    if not is_ticket_id(rule["ticketId"]):
+        raise HTTPException(status_code=422, detail="Ticket ID must look like SEC-123 or CHG-123.")
+    if not is_expiration_date(rule["expiresAt"]):
+        raise HTTPException(status_code=422, detail="Expiration date must use YYYY-MM-DD.")
 
     duplicate = db.execute(
         """
@@ -1068,7 +1098,7 @@ def generate_firewall_snippet(db: sqlite3.Connection, platform: str) -> str:
 
 
 def format_firewall_snippet_rule(rule: dict[str, Any], platform: str) -> str:
-    description = f"{rule['id']} {rule['reason']}"
+    description = f"{rule['id']} {rule['ticketId'] or 'no-ticket'} expires {rule['expiresAt'] or 'n/a'} - {rule['reason']}"
     port_block = "" if rule["protocol"] == "ICMP" else f"\n    <port>{escape_xml(rule['port'])}</port>"
     category = "ops-portal-review" if platform == "opnsense" else "Ops Portal Review"
     return f"""  <rule>
@@ -1151,6 +1181,26 @@ def is_ip(value: str) -> bool:
         number = int(part)
         if number < 0 or number > 255:
             return False
+    return True
+
+
+def is_ticket_id(value: str) -> bool:
+    if not value or len(value) > 32:
+        return False
+    parts = value.split("-")
+    if len(parts) != 2:
+        return False
+    prefix, number = parts
+    return prefix.isalpha() and prefix.isupper() and number.isdigit()
+
+
+def is_expiration_date(value: str) -> bool:
+    if not value:
+        return False
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return False
     return True
 
 

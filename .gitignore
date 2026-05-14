@@ -13,6 +13,8 @@ data/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.tmp_pytest/
+.tmp_pytest_cache/
 *.sqlite3
 
 # Future Node version

@@ -22,6 +22,7 @@ let currentSnippet = "Generate an OPNsense or pfSense snippet from approved and 
 const viewTitles = {
   dashboard: "Firewall and VPN Operations",
   firewall: "Firewall Rule Requests",
+  theory: "Firewall and VPN Theory",
   vpn: "VPN Tunnel Inventory",
   approvals: "Approval Queue",
   health: "Health Checks",

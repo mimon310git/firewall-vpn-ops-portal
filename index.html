@@ -35,6 +35,9 @@
       <symbol id="icon-lab" viewBox="0 0 24 24">
         <path d="M9 3h6v2h-1v4.4l5.4 8.6A2 2 0 0 1 17.7 21H6.3a2 2 0 0 1-1.7-3L10 9.4V5H9V3Zm3 7.6L6.3 19h11.4L12 10.6ZM9 17l1.2-2h3.6L15 17H9Z" />
       </symbol>
+      <symbol id="icon-book" viewBox="0 0 24 24">
+        <path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Zm2.5-.5A.5.5 0 0 0 7 4.5v13.05c.17-.03.33-.05.5-.05H18V4H7.5ZM4 5h1v16H4V5Z" />
+      </symbol>
     </svg>
 
     <div class="app-shell">
@@ -55,6 +58,10 @@
           <button class="nav-item" data-view="firewall" type="button">
             <svg><use href="#icon-shield"></use></svg>
             <span>Firewall Rules</span>
+          </button>
+          <button class="nav-item" data-view="theory" type="button">
+            <svg><use href="#icon-book"></use></svg>
+            <span>Theory</span>
           </button>
           <button class="nav-item" data-view="vpn" type="button">
             <svg><use href="#icon-vpn"></use></svg>
@@ -155,7 +162,7 @@
               <div class="panel-header">
                 <div>
                   <h2 id="firewallHeading">Firewall Rules</h2>
-                  <p>Change requests move through pending, approved, and deployed states.</p>
+                  <p>Change requests define source, destination, protocol, port, business reason, and approval state.</p>
                 </div>
               </div>
               <div class="table-wrap">
@@ -198,11 +205,17 @@
                   <label>
                     Port
                     <input name="port" placeholder="443" required />
+                    <span class="field-note">Use <code>any</code> only for ICMP. TCP/UDP ports must be 1-65535.</span>
                   </label>
                 </div>
                 <label>
                   Reason
-                  <textarea name="reason" rows="3" placeholder="Why is this flow required?" required></textarea>
+                  <textarea
+                    name="reason"
+                    rows="3"
+                    placeholder="Business reason, system owner, and expected traffic flow"
+                    required
+                  ></textarea>
                 </label>
                 <label>
                   Owner
@@ -224,6 +237,78 @@
             </div>
             <pre id="commandPreview">Select an approved rule to generate a deployment command.</pre>
           </section>
+        </section>
+
+        <section class="view" id="view-theory" aria-labelledby="theoryHeading">
+          <div class="section-heading">
+            <div>
+              <h2 id="theoryHeading">Firewall and VPN Theory</h2>
+              <p>Reference material for ports, rule review, risk, and operational change flow.</p>
+            </div>
+            <span class="status-pill info">Portfolio notes</span>
+          </div>
+
+          <div class="reference-grid">
+            <section class="panel reference-panel">
+              <div class="panel-header">
+                <h3>Common Ports</h3>
+                <span class="status-pill neutral">Review aid</span>
+              </div>
+              <div class="port-list">
+                <div><strong>22</strong><span>SSH administration. Scope source tightly and avoid public exposure.</span></div>
+                <div><strong>53</strong><span>DNS. UDP is common for queries, TCP is used for larger answers and zone transfers.</span></div>
+                <div><strong>80 / 443</strong><span>HTTP and HTTPS application access. HTTPS is preferred for production services.</span></div>
+                <div><strong>445</strong><span>SMB file sharing. Treat as sensitive and keep internal-only.</span></div>
+                <div><strong>3389</strong><span>RDP admin access. Requires strict source scope and approval.</span></div>
+                <div><strong>500 / 4500</strong><span>IPsec IKE and NAT traversal for VPN tunnels.</span></div>
+                <div><strong>1194</strong><span>Common OpenVPN listener, often UDP.</span></div>
+                <div><strong>51820</strong><span>Common WireGuard listener, usually UDP.</span></div>
+              </div>
+            </section>
+
+            <section class="panel reference-panel">
+              <div class="panel-header">
+                <h3>Rule Review</h3>
+                <span class="status-pill neutral">Least privilege</span>
+              </div>
+              <div class="review-list">
+                <p><strong>Source</strong> should be the smallest realistic network, host, or VPN pool.</p>
+                <p><strong>Destination</strong> should point to the exact server or subnet that owns the service.</p>
+                <p><strong>Protocol and port</strong> should match the real application, not a broad placeholder.</p>
+                <p><strong>Reason</strong> should include business purpose, owner, expected traffic, and review context.</p>
+                <p><strong>Rollback</strong> should be possible by removing or disabling the generated rule.</p>
+              </div>
+            </section>
+          </div>
+
+          <div class="reference-grid">
+            <section class="panel reference-panel">
+              <div class="panel-header">
+                <h3>Risk Model</h3>
+                <span class="status-pill neutral">Scoring logic</span>
+              </div>
+              <div class="review-list">
+                <p><strong>Low risk</strong> scoped internal access with a specific source, destination, and service.</p>
+                <p><strong>Medium risk</strong> admin services, management networks, SMB, SSH, or RDP.</p>
+                <p><strong>High risk</strong> broad sources like <code>0.0.0.0/0</code>, broad destinations, or exposed DMZ flows.</p>
+                <p><strong>Rejected</strong> means the request stays in history but no longer blocks duplicate review decisions.</p>
+              </div>
+            </section>
+
+            <section class="panel reference-panel">
+              <div class="panel-header">
+                <h3>Change Lifecycle</h3>
+                <span class="status-pill neutral">Ops flow</span>
+              </div>
+              <div class="timeline-list">
+                <div><strong>1. Request</strong><span>Requester defines source, destination, service, owner, and reason.</span></div>
+                <div><strong>2. Review</strong><span>Approver checks risk, scope, duplicate rules, and business need.</span></div>
+                <div><strong>3. Approve / Reject</strong><span>Approved rules can be prepared for deployment; rejected rules stay in audit.</span></div>
+                <div><strong>4. Deploy</strong><span>Operator marks reviewed changes as deployed. Commands remain manual.</span></div>
+                <div><strong>5. Verify</strong><span>Health checks and lab checks confirm expected connectivity state.</span></div>
+              </div>
+            </section>
+          </div>
         </section>
 
         <section class="view" id="view-vpn" aria-labelledby="vpnHeading">

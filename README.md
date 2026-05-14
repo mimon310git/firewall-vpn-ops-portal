@@ -64,6 +64,16 @@ The app lets you create a firewall rule request with:
 
 It validates the input and blocks common mistakes such as invalid IP ranges, invalid ports, and duplicate active rules.
 
+The UI includes a port reference and rule review notes for common operational decisions:
+
+- `22` SSH and `3389` RDP are treated as admin access and raise risk.
+- `445` SMB is treated as sensitive internal access.
+- `500/4500`, `1194`, and `51820` map to common VPN services.
+- `0.0.0.0/0` and other broad exposure patterns are marked high risk.
+- Good requests include a business reason, owner, expected protocol, and scoped source/destination.
+
+The app also has a `Theory` section with a short reference for common ports, rule review, risk scoring, and the operational change lifecycle.
+
 ### Approval Workflow
 
 Firewall changes start as `pending`.

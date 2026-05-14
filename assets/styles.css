@@ -540,6 +540,12 @@ textarea:disabled {
   align-items: start;
 }
 
+.reference-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: 18px;
+}
+
 .table-wrap {
   overflow-x: auto;
   margin-top: 16px;
@@ -689,6 +695,66 @@ textarea:focus {
   font-weight: 700;
 }
 
+.field-note {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.field-note code,
+.review-list code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-family: "Cascadia Code", Consolas, monospace;
+  font-size: 0.88em;
+}
+
+.reference-panel {
+  box-shadow: none;
+}
+
+.port-list,
+.review-list,
+.timeline-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.port-list {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.port-list div,
+.review-list p,
+.timeline-list div {
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.port-list div:last-child,
+.review-list p:last-child,
+.timeline-list div:last-child {
+  border-bottom: 0;
+}
+
+.port-list strong,
+.timeline-list strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.port-list span,
+.review-list p,
+.timeline-list span {
+  color: var(--muted);
+}
+
 .command-panel {
   box-shadow: none;
 }
@@ -832,7 +898,7 @@ pre {
   }
 
   .nav-list {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     overflow-x: auto;
   }
 
@@ -846,7 +912,8 @@ pre {
 
   .metric-grid,
   .dashboard-grid,
-  .split-layout {
+  .split-layout,
+  .reference-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -875,7 +942,7 @@ pre {
   }
 
   .nav-list {
-    grid-template-columns: repeat(6, 150px);
+    grid-template-columns: repeat(7, 150px);
   }
 
   .metric-grid {

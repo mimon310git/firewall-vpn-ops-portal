@@ -128,6 +128,14 @@ The lab tools page adds Version 3 behavior:
 
 No generated snippet is imported automatically and no firewall command is executed by the app.
 
+## AI-Assisted Development
+
+This project was built with Codex as an AI coding assistant.
+
+I used Codex to help design and implement the FastAPI backend, SQLite persistence, frontend workflow, validation rules, API tests, and documentation. My role was to drive the requirements, review the generated changes, run the app locally, test the workflow, debug setup issues, check what should not be committed to Git, and keep the project scoped as a safe simulation.
+
+The goal is not to hide AI usage. The goal is to demonstrate a practical AI-assisted development workflow: define requirements, iterate on features, validate behavior, check safety boundaries, and prepare a clean repository.
+
 ## Portfolio Roadmap
 
 ### Version 1
@@ -158,11 +166,11 @@ No generated snippet is imported automatically and no firewall command is execut
 Short version:
 
 ```text
-I built a small operations portal that simulates firewall and VPN change management. It validates network inputs, tracks approval state, generates deployment commands, runs health checks, and keeps an audit log. I used it to practice both networking concepts and QA automation scenarios.
+I built this project with Codex as an AI coding assistant. It is a small operations portal that simulates firewall and VPN change management: validating network inputs, tracking approvals, generating reviewed commands/snippets, running health checks, and keeping an audit log.
 ```
 
 Stronger version:
 
 ```text
-The project models a real operational workflow: a requester opens a firewall or VPN change, the app validates the network data, an approver reviews risk, and the operator marks it deployed. I also included health checks, gated lab checks, firewall export snippets, and audit history so the project is useful for testing and troubleshooting scenarios, not only CRUD screens.
+The project models a real operational workflow: a requester opens a firewall or VPN change, the app validates the network data, an approver reviews risk, and the operator marks it deployed. I used Codex heavily as a pair-programming assistant, while I drove the requirements, tested the application, reviewed safety boundaries, and verified that no real firewall changes are executed. The project helped me practice networking concepts, backend validation, API testing, audit logging, and responsible AI-assisted development.
 ```
